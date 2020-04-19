@@ -19,8 +19,8 @@ public class FixVocabulary {
 
 	public static void main(String[] args) throws IOException {
 		new FixVocabulary(
-				"/Users/efj/Desktop/topic7.txt",
-				new ExcelVocabularyWriter("/Users/efj/Desktop/topic7_final.xlsx","Topic 7")
+				"/Users/efj/Desktop/Topic2.txt",
+				new ExcelVocabularyWriter("/Users/efj/Desktop/Topic2_final.xlsx","Topic 7")
 		).doIt();
 	}
 
@@ -60,19 +60,24 @@ public class FixVocabulary {
 
 		List<VocabularyItem> items = new ArrayList<>();
 		for(int i=0; i<lines.size(); i++) {
-			VocabularyItem item = getVocabularyItem(lines.get(i));
+			try {
+				VocabularyItem item = getVocabularyItem(lines.get(i));
+				// Fail if english has japanese character
+				if(!item.isValid()){
+					System.out.println("Line " + (i+1) + ": " + lines.get(i));
+					System.out.println(" -> Kanji: " + item.getKanji());
+					System.out.println(" -> Kanas: " + item.getKana());
+					System.out.println(" -> English: " + item.getEnglish());
+					throw new IllegalArgumentException("English language should not contain any japanese characters");
+				}
 
-			// Fail if english has japanese character
-			if(!item.isValid()){
-				System.out.println("Line " + (i+1) + ": " + lines.get(i));
-				System.out.println(" -> Kanji: " + item.getKanji());
-				System.out.println(" -> Kanas: " + item.getKana());
-				System.out.println(" -> English: " + item.getEnglish());
-				throw new IllegalArgumentException("English language should not contain any japanese characters");
+				if(!items.contains(item)){
+					items.add(item);
+				}
 			}
-
-			if(!items.contains(item)){
-				items.add(item);
+			catch(StringIndexOutOfBoundsException e){
+				System.out.println("Line " + (i+1) + ": " + lines.get(i));
+				throw new IllegalArgumentException("Unable to get vocabulary item from line");
 			}
 		}
 
